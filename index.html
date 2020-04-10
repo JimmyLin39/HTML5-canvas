@@ -52,11 +52,14 @@
       }
 
       function drawRect(e) {
-        isDrawing = false;
+        // stop the function from running when not moused down
+        if (!isDrawing) return;
         reset(ctx);
         const width = e.offsetX - firstX;
         const height = e.offsetY - firstY;
         ctx.strokeRect(firstX, firstY, width, height);
+        // set the begining point for next stroke
+        [lastX, lastY] = [e.offsetX, e.offsetY];
       }
 
       canvas.addEventListener("mousedown", e => {
@@ -65,8 +68,8 @@
         [lastX, lastY] = [e.offsetX, e.offsetY];
       });
 
-      canvas.addEventListener("mousemove", draw);
-      canvas.addEventListener("mouseup", drawRect);
+      canvas.addEventListener("mousemove", drawRect);
+      canvas.addEventListener("mouseup", () => (isDrawing = false));
       canvas.addEventListener("mouseout", () => (isDrawing = false));
     </script>
 
