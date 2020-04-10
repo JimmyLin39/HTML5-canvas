@@ -51,6 +51,14 @@
         ctx.stroke();
       }
 
+      function drawRect(e) {
+        isDrawing = false;
+        reset(ctx);
+        const width = e.offsetX - firstX;
+        const height = e.offsetY - firstY;
+        ctx.strokeRect(firstX, firstY, width, height);
+      }
+
       canvas.addEventListener("mousedown", e => {
         isDrawing = true;
         [firstX, firstY] = [e.offsetX, e.offsetY];
@@ -58,7 +66,7 @@
       });
 
       canvas.addEventListener("mousemove", draw);
-      canvas.addEventListener("mouseup", drawStraight);
+      canvas.addEventListener("mouseup", drawRect);
       canvas.addEventListener("mouseout", () => (isDrawing = false));
     </script>
 
