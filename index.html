@@ -13,19 +13,6 @@
     </div>
     <canvas id="draw" width="400" height="400">
     <script>
-      // Control buttons
-      const btnContainer = document.querySelector("#control-btns-group");
-      const btns = btnContainer.querySelectorAll("button");
-
-      // Loop through the buttons and add the active class to the current/clicked button
-      for (let i = 0; i < btns.length; i++) {
-        btns[i].addEventListener("click", function() {
-          const current = document.getElementsByClassName("active");
-          current[0].classList.remove("active")
-          this.classList.add("active")
-        });
-      }
-
       // initialize canvas
       const canvas = document.querySelector("#draw");
       const ctx = canvas.getContext("2d");
@@ -34,18 +21,45 @@
       ctx.lineCap = "round";
       ctx.lineWidth = 10;
 
+      // modes
+      const FREEHAND = 'freehand'
+      const STRAIGHT = 'straight'
+      const RECTANGLE = 'rectangle'
       // states
       let isDrawing = false;
       let lastX = 0;
       let lastY = 0;
       let firstX = 0;
       let firstY = 0;
+      let currentMode = FREEHAND
+
+      // Control buttons
+      const btnContainer = document.querySelector("#control-btns-group");
+      const btns = btnContainer.querySelectorAll("button");
+
+      // Loop through the buttons and add the active class to the current/clicked button
+      for (let i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function () {
+          const current = document.getElementsByClassName("active");
+          current[0].classList.remove("active")
+          this.classList.add("active")
+          // set current drawing mode
+          resetCanvas()
+          if (this.className.includes(FREEHAND)) {
+            currentMode = FREEHAND
+          } else if (this.className.includes(STRAIGHT)) {
+            currentMode = STRAIGHT
+          } else if (this.className.includes(RECTANGLE)) {
+            currentMode = RECTANGLE
+          }
+        });
+      }
 
       function resetCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
 
-      function draw(e) {
+      function drawFreehand(e) {
         // stop the function from running when not moused down
         if (!isDrawing) return;
         ctx.beginPath();
@@ -80,14 +94,38 @@
         [lastX, lastY] = [e.offsetX, e.offsetY];
       }
 
+      function handleMouseMove(e) {
+        switch (currentMode) {
+          case FREEHAND:
+            drawFreehand(e)
+            break;
+          case STRAIGHT:
+            drawFreehand(e)
+            break;
+          case RECTANGLE:
+            drawRect(e)
+            break;
+          default:
+            break;
+        }
+      }
+
+      function handleMouseUp(e) {
+        if (currentMode === STRAIGHT) {
+          drawStraight(e)
+        } else {
+          isDrawing = false
+        }
+      }
+
       canvas.addEventListener("mousedown", e => {
         isDrawing = true;
         [firstX, firstY] = [e.offsetX, e.offsetY];
         [lastX, lastY] = [e.offsetX, e.offsetY];
       });
 
-      canvas.addEventListener("mousemove", drawRect);
-      canvas.addEventListener("mouseup", () => (isDrawing = false));
+      canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("mouseup", handleMouseUp);
       canvas.addEventListener("mouseout", () => (isDrawing = false));
     </script>
 
