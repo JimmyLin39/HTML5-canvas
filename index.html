@@ -11,20 +11,22 @@
       <button class="straight-line button" type="button">straight line</button>
       <button class="rectangle button" type="button">rectangle</button>
     </div>
+    <div id="color-btns-group"></div>
     <canvas id="draw" width="400" height="400">
     <script>
       // initialize canvas
       const canvas = document.querySelector("#draw");
       const ctx = canvas.getContext("2d");
-      ctx.stokeStyle = "#FFF";
+      const strokeColors = ["f38181", "fce38a", "eaffd0", "95e1d3", "a8d8ea", "aa96da", "fcbad3", "ffffd2"]
+      ctx.strokeStyle = `#${strokeColors[0]}`;
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.lineWidth = 10;
 
       // modes
-      const FREEHAND = 'freehand'
-      const STRAIGHT = 'straight'
-      const RECTANGLE = 'rectangle'
+      const FREEHAND = "freehand"
+      const STRAIGHT = "straight"
+      const RECTANGLE = "rectangle"
       // states
       let isDrawing = false;
       let lastX = 0;
@@ -34,8 +36,8 @@
       let currentMode = FREEHAND
 
       // Control buttons
-      const btnContainer = document.querySelector("#control-btns-group");
-      const btns = btnContainer.querySelectorAll("button");
+      const controlBtnContainer = document.querySelector("#control-btns-group");
+      const btns = controlBtnContainer.querySelectorAll("button");
 
       // Loop through the buttons and add the active class to the current/clicked button
       for (let i = 0; i < btns.length; i++) {
@@ -55,6 +57,19 @@
         });
       }
 
+      // color buttons
+      const colorBtnContainer = document.querySelector("#color-btns-group")
+      console.log("color btn container:", colorBtnContainer)
+      strokeColors.forEach(color => {
+        const newColorBtn = document.createElement("button")
+        newColorBtn.type = "button"
+        newColorBtn.style = `
+          background: #${color};
+          padding: 10px;
+          margin-right: 5px;
+        `
+        colorBtnContainer.appendChild(newColorBtn)
+      })
       function resetCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
@@ -143,7 +158,8 @@
         cursor: pointer;
       }
       .button.active {
-        color: purple;
+        background: purple;
+        color: white;
       }
     </style>
   </body>
