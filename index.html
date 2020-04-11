@@ -6,24 +6,42 @@
   </head>
 
   <body>
-    <canvas id="draw" width="800" height="800"></canvas>
+    <div id="control-btns-group">
+      <button class="freehand-path button active" type="button">freehand path</button>
+      <button class="straight-line button" type="button">straight line</button>
+      <button class="rectangle button" type="button">rectangle</button>
+    </div>
+    <canvas id="draw" width="400" height="400">
     <script>
+      // Control buttons
+      const btnContainer = document.querySelector("#control-btns-group");
+      const btns = btnContainer.querySelectorAll("button");
+
+      // Loop through the buttons and add the active class to the current/clicked button
+      for (let i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function() {
+          const current = document.getElementsByClassName("active");
+          current[0].classList.remove("active")
+          this.classList.add("active")
+        });
+      }
+
+      // initialize canvas
       const canvas = document.querySelector("#draw");
       const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
       ctx.stokeStyle = "#FFF";
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.lineWidth = 10;
 
+      // states
       let isDrawing = false;
       let lastX = 0;
       let lastY = 0;
       let firstX = 0;
       let firstY = 0;
 
-      function reset() {
+      function resetCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
 
@@ -42,7 +60,7 @@
 
       function drawStraight(e) {
         isDrawing = false;
-        reset(ctx);
+        resetCanvas();
         ctx.beginPath();
         // start from
         ctx.moveTo(firstX, firstY);
@@ -54,7 +72,7 @@
       function drawRect(e) {
         // stop the function from running when not moused down
         if (!isDrawing) return;
-        reset(ctx);
+        resetCanvas();
         const width = e.offsetX - firstX;
         const height = e.offsetY - firstY;
         ctx.strokeRect(firstX, firstY, width, height);
@@ -76,7 +94,18 @@
     <style>
       html,
       body {
-        margin: 0;
+        margin: 10px;
+      }
+      #draw {
+        margin-top: 20px;
+        border: dashed purple;
+      }
+
+      button {
+        cursor: pointer;
+      }
+      .button.active {
+        color: purple;
       }
     </style>
   </body>
