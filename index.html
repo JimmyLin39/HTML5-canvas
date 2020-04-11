@@ -7,33 +7,48 @@
 
   <body>
     <div id="control-btns-group">
-      <button class="freehand-path button active" type="button">freehand path</button>
-      <button class="straight-line button" type="button">straight line</button>
-      <button class="rectangle button" type="button">rectangle</button>
+      <button class="freehand-path control-btn active" type="button">
+        freehand path
+      </button>
+      <button class="straight-line control-btn" type="button">
+        straight line
+      </button>
+      <button class="rectangle control-btn" type="button">rectangle</button>
     </div>
     <div id="color-btns-group"></div>
-    <canvas id="draw" width="400" height="400">
+    <canvas id="draw" width="400" height="400"></canvas>
     <script>
       // initialize canvas
       const canvas = document.querySelector("#draw");
       const ctx = canvas.getContext("2d");
-      const strokeColors = ["f38181", "fce38a", "eaffd0", "95e1d3", "a8d8ea", "aa96da", "fcbad3", "ffffd2"]
+      // color palette
+      const strokeColors = [
+        "f38181",
+        "fce38a",
+        "eaffd0",
+        "95e1d3",
+        "a8d8ea",
+        "aa96da",
+        "fcbad3",
+        "ffffd2"
+      ];
+      // set default stroke style
       ctx.strokeStyle = `#${strokeColors[0]}`;
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.lineWidth = 10;
 
       // modes
-      const FREEHAND = "freehand"
-      const STRAIGHT = "straight"
-      const RECTANGLE = "rectangle"
+      const FREEHAND = "freehand";
+      const STRAIGHT = "straight";
+      const RECTANGLE = "rectangle";
       // states
       let isDrawing = false;
       let lastX = 0;
       let lastY = 0;
       let firstX = 0;
       let firstY = 0;
-      let currentMode = FREEHAND
+      let currentMode = FREEHAND;
 
       // Control buttons
       const controlBtnContainer = document.querySelector("#control-btns-group");
@@ -41,35 +56,47 @@
 
       // Loop through the buttons and add the active class to the current/clicked button
       for (let i = 0; i < btns.length; i++) {
-        btns[i].addEventListener("click", function () {
-          const current = document.getElementsByClassName("active");
-          current[0].classList.remove("active")
-          this.classList.add("active")
+        btns[i].addEventListener("click", function() {
+          const current = controlBtnContainer.querySelector(".active");
+          current.classList.remove("active");
+          this.classList.add("active");
           // set current drawing mode
-          resetCanvas()
+          resetCanvas();
           if (this.className.includes(FREEHAND)) {
-            currentMode = FREEHAND
+            currentMode = FREEHAND;
           } else if (this.className.includes(STRAIGHT)) {
-            currentMode = STRAIGHT
+            currentMode = STRAIGHT;
           } else if (this.className.includes(RECTANGLE)) {
-            currentMode = RECTANGLE
+            currentMode = RECTANGLE;
           }
         });
       }
 
-      // color buttons
-      const colorBtnContainer = document.querySelector("#color-btns-group")
-      console.log("color btn container:", colorBtnContainer)
-      strokeColors.forEach(color => {
-        const newColorBtn = document.createElement("button")
-        newColorBtn.type = "button"
+      // Color palette buttons
+      const colorBtnContainer = document.querySelector("#color-btns-group");
+      strokeColors.forEach((color, index) => {
+        const newColorBtn = document.createElement("button");
+        newColorBtn.type = "button";
         newColorBtn.style = `
           background: #${color};
           padding: 10px;
           margin-right: 5px;
-        `
-        colorBtnContainer.appendChild(newColorBtn)
-      })
+        `;
+        newColorBtn.classList.add("color-btn");
+        // set default active color
+        if (index === 0) {
+          newColorBtn.classList.add("active");
+        }
+        // switch between colors
+        newColorBtn.addEventListener("click", function() {
+          const current = colorBtnContainer.querySelector(".active");
+          current.classList.remove("active");
+          this.classList.add("active");
+          ctx.strokeStyle = `#${strokeColors[index]}`;
+        });
+        colorBtnContainer.appendChild(newColorBtn);
+      });
+
       function resetCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
@@ -88,7 +115,6 @@
       }
 
       function drawStraight(e) {
-        isDrawing = false;
         resetCanvas();
         ctx.beginPath();
         // start from
@@ -109,38 +135,39 @@
         [lastX, lastY] = [e.offsetX, e.offsetY];
       }
 
+      function handleStart(e) {
+        resetCanvas();
+        isDrawing = true;
+        [firstX, firstY] = [e.offsetX, e.offsetY];
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      }
+
       function handleMouseMove(e) {
         switch (currentMode) {
           case FREEHAND:
-            drawFreehand(e)
+            drawFreehand(e);
             break;
           case STRAIGHT:
-            drawFreehand(e)
+            drawFreehand(e);
             break;
           case RECTANGLE:
-            drawRect(e)
+            drawRect(e);
             break;
           default:
             break;
         }
       }
 
-      function handleMouseUp(e) {
+      function handleStop(e) {
+        isDrawing = false;
         if (currentMode === STRAIGHT) {
-          drawStraight(e)
-        } else {
-          isDrawing = false
+          drawStraight(e);
         }
       }
 
-      canvas.addEventListener("mousedown", e => {
-        isDrawing = true;
-        [firstX, firstY] = [e.offsetX, e.offsetY];
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-      });
-
+      canvas.addEventListener("mousedown", handleStart);
       canvas.addEventListener("mousemove", handleMouseMove);
-      canvas.addEventListener("mouseup", handleMouseUp);
+      canvas.addEventListener("mouseup", handleStop);
       canvas.addEventListener("mouseout", () => (isDrawing = false));
     </script>
 
@@ -149,17 +176,20 @@
       body {
         margin: 10px;
       }
+      button {
+        cursor: pointer;
+      }
+
       #draw {
         margin-top: 20px;
         border: dashed purple;
       }
-
-      button {
-        cursor: pointer;
-      }
-      .button.active {
+      .control-btn.active {
         background: purple;
         color: white;
+      }
+      .color-btn.active {
+        border: dashed purple;
       }
     </style>
   </body>
