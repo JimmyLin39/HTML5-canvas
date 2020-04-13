@@ -16,8 +16,10 @@
       <button class="rectangle control-btn" type="button">rectangle</button>
     </div>
     <div id="color-btns-group"></div>
-    <canvas id="render-canvas" width="400" height="400"></canvas>
-    <canvas id="result-canvas" width="400" height="400"></canvas>
+    <div class="canvas-container">
+      <canvas id="render-canvas" width="400" height="400"></canvas>
+      <canvas id="result-canvas" width="400" height="400"></canvas>
+    </div>
     <script>
       // initialize canvas
       const renderCanvas = document.querySelector("#render-canvas");
@@ -199,12 +201,17 @@
       button {
         cursor: pointer;
       }
-
+      .canvas-container {
+        position: relative;
+      }
       #render-canvas {
         margin-top: 20px;
         border: dashed purple;
       }
       #result-canvas {
+        position: absolute;
+        left: 0;
+        z-index: -99;
         margin-top: 20px;
         border: dashed purple;
       }
