@@ -21,176 +21,181 @@
       <canvas id="result-canvas" width="400" height="400"></canvas>
     </div>
     <script>
-      // initialize canvas
-      const renderCanvas = document.querySelector("#render-canvas");
-      const resultCanvas = document.querySelector("#result-canvas");
-      const renderCtx = renderCanvas.getContext("2d");
-      const resultCtx = resultCanvas.getContext("2d");
-      // color palette
-      const strokeColors = [
-        "f38181",
-        "fce38a",
-        "eaffd0",
-        "95e1d3",
-        "a8d8ea",
-        "aa96da",
-        "fcbad3",
-        "ffffd2"
-      ];
-      // set default stroke style
-      renderCtx.strokeStyle = `#${strokeColors[0]}`;
-      renderCtx.lineJoin = "round";
-      renderCtx.lineCap = "round";
-      renderCtx.lineWidth = 5;
-      resultCtx.strokeStyle = `#${strokeColors[0]}`;
-      resultCtx.lineJoin = "round";
-      resultCtx.lineCap = "round";
-      resultCtx.lineWidth = 5;
+      function load() {
+        // initialize canvas
+        const renderCanvas = document.querySelector("#render-canvas");
+        const resultCanvas = document.querySelector("#result-canvas");
+        const renderCtx = renderCanvas.getContext("2d");
+        const resultCtx = resultCanvas.getContext("2d");
+        // color palette
+        const strokeColors = [
+          "f38181",
+          "fce38a",
+          "eaffd0",
+          "95e1d3",
+          "a8d8ea",
+          "aa96da",
+          "fcbad3",
+          "ffffd2"
+        ];
+        // set default stroke style
+        renderCtx.strokeStyle = `#${strokeColors[0]}`;
+        renderCtx.lineJoin = "round";
+        renderCtx.lineCap = "round";
+        renderCtx.lineWidth = 5;
+        resultCtx.strokeStyle = `#${strokeColors[0]}`;
+        resultCtx.lineJoin = "round";
+        resultCtx.lineCap = "round";
+        resultCtx.lineWidth = 5;
 
-      // modes
-      const FREEHAND = "freehand";
-      const STRAIGHT = "straight";
-      const RECTANGLE = "rectangle";
-      // states
-      let isDrawing = false;
-      let lastX = 0;
-      let lastY = 0;
-      let firstX = 0;
-      let firstY = 0;
-      let currentMode = FREEHAND;
+        // modes
+        const FREEHAND = "freehand";
+        const STRAIGHT = "straight";
+        const RECTANGLE = "rectangle";
+        // states
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let firstX = 0;
+        let firstY = 0;
+        let currentMode = FREEHAND;
 
-      // Control buttons
-      const controlBtnContainer = document.querySelector("#control-btns-group");
-      const btns = controlBtnContainer.querySelectorAll("button");
+        // Control buttons
+        const controlBtnContainer = document.querySelector(
+          "#control-btns-group"
+        );
+        const btns = controlBtnContainer.querySelectorAll("button");
 
-      // Loop through the buttons and add the active class to the current/clicked button
-      for (let i = 0; i < btns.length; i++) {
-        btns[i].addEventListener("click", function() {
-          const current = controlBtnContainer.querySelector(".active");
-          current.classList.remove("active");
-          this.classList.add("active");
-          // set current drawing mode
-          resetAllCanvas();
-          if (this.className.includes(FREEHAND)) {
-            currentMode = FREEHAND;
-          } else if (this.className.includes(STRAIGHT)) {
-            currentMode = STRAIGHT;
-          } else if (this.className.includes(RECTANGLE)) {
-            currentMode = RECTANGLE;
-          }
-        });
-      }
+        // Loop through the buttons and add the active class to the current/clicked button
+        for (let i = 0; i < btns.length; i++) {
+          btns[i].addEventListener("click", function() {
+            const current = controlBtnContainer.querySelector(".active");
+            current.classList.remove("active");
+            this.classList.add("active");
+            // set current drawing mode
+            resetAllCanvas();
+            if (this.className.includes(FREEHAND)) {
+              currentMode = FREEHAND;
+            } else if (this.className.includes(STRAIGHT)) {
+              currentMode = STRAIGHT;
+            } else if (this.className.includes(RECTANGLE)) {
+              currentMode = RECTANGLE;
+            }
+          });
+        }
 
-      // Color palette buttons
-      const colorBtnContainer = document.querySelector("#color-btns-group");
-      strokeColors.forEach((color, index) => {
-        const newColorBtn = document.createElement("button");
-        newColorBtn.type = "button";
-        newColorBtn.style = `
+        // Color palette buttons
+        const colorBtnContainer = document.querySelector("#color-btns-group");
+        strokeColors.forEach((color, index) => {
+          const newColorBtn = document.createElement("button");
+          newColorBtn.type = "button";
+          newColorBtn.style = `
           background: #${color};
         `;
-        newColorBtn.classList.add("color-btn");
-        // set default active color
-        if (index === 0) {
-          newColorBtn.classList.add("active");
-        }
-        // switch between colors
-        newColorBtn.addEventListener("click", function() {
-          const current = colorBtnContainer.querySelector(".active");
-          current.classList.remove("active");
-          this.classList.add("active");
-          renderCtx.strokeStyle = `#${strokeColors[index]}`;
-          resultCtx.strokeStyle = `#${strokeColors[index]}`;
+          newColorBtn.classList.add("color-btn");
+          // set default active color
+          if (index === 0) {
+            newColorBtn.classList.add("active");
+          }
+          // switch between colors
+          newColorBtn.addEventListener("click", function() {
+            const current = colorBtnContainer.querySelector(".active");
+            current.classList.remove("active");
+            this.classList.add("active");
+            renderCtx.strokeStyle = `#${strokeColors[index]}`;
+            resultCtx.strokeStyle = `#${strokeColors[index]}`;
+          });
+          colorBtnContainer.appendChild(newColorBtn);
         });
-        colorBtnContainer.appendChild(newColorBtn);
-      });
 
-      function resetAllCanvas() {
-        renderCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
-        resultCtx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
-      }
-
-      function resetRenderCanvas() {
-        renderCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
-      }
-
-      function drawFreehand(e) {
-        // stop the function from running when not moused down
-        if (!isDrawing) return;
-        renderCtx.beginPath();
-        // start from
-        renderCtx.moveTo(lastX, lastY);
-        // go to
-        renderCtx.lineTo(e.offsetX, e.offsetY);
-        renderCtx.stroke();
-        // set the begining point for next stroke
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-      }
-
-      function drawStraight(e) {
-        resetRenderCanvas();
-        resultCtx.beginPath();
-        // start from
-        resultCtx.moveTo(firstX, firstY);
-        // go to
-        resultCtx.lineTo(e.offsetX, e.offsetY);
-        resultCtx.stroke();
-      }
-
-      function renderRect(e) {
-        // stop the function from running when not moused down
-        if (!isDrawing) return;
-        resetRenderCanvas();
-        const width = e.offsetX - firstX;
-        const height = e.offsetY - firstY;
-        renderCtx.strokeRect(firstX, firstY, width, height);
-        // set the begining point for next stroke
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-      }
-
-      function drawRect(e) {
-        const width = e.offsetX - firstX;
-        const height = e.offsetY - firstY;
-        resultCtx.strokeRect(firstX, firstY, width, height);
-        // set the begining point for next stroke
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-      }
-
-      function handleStart(e) {
-        isDrawing = true;
-        [firstX, firstY] = [e.offsetX, e.offsetY];
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-      }
-
-      function handleMouseMove(e) {
-        switch (currentMode) {
-          case FREEHAND:
-            drawFreehand(e);
-            break;
-          case STRAIGHT:
-            drawFreehand(e);
-            break;
-          case RECTANGLE:
-            renderRect(e);
-            break;
-          default:
-            break;
+        function resetAllCanvas() {
+          renderCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
+          resultCtx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
         }
-      }
 
-      function handleStop(e) {
-        isDrawing = false;
-        if (currentMode === STRAIGHT) {
-          drawStraight(e);
-        } else if (currentMode === RECTANGLE) {
-          drawRect(e);
+        function resetRenderCanvas() {
+          renderCtx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
         }
-      }
 
-      renderCanvas.addEventListener("mousedown", handleStart);
-      renderCanvas.addEventListener("mousemove", handleMouseMove);
-      renderCanvas.addEventListener("mouseup", handleStop);
-      renderCanvas.addEventListener("mouseout", () => (isDrawing = false));
+        function drawFreehand(e) {
+          // stop the function from running when not moused down
+          if (!isDrawing) return;
+          renderCtx.beginPath();
+          // start from
+          renderCtx.moveTo(lastX, lastY);
+          // go to
+          renderCtx.lineTo(e.offsetX, e.offsetY);
+          renderCtx.stroke();
+          // set the begining point for next stroke
+          [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function drawStraight(e) {
+          resetRenderCanvas();
+          resultCtx.beginPath();
+          // start from
+          resultCtx.moveTo(firstX, firstY);
+          // go to
+          resultCtx.lineTo(e.offsetX, e.offsetY);
+          resultCtx.stroke();
+        }
+
+        function renderRect(e) {
+          // stop the function from running when not moused down
+          if (!isDrawing) return;
+          resetRenderCanvas();
+          const width = e.offsetX - firstX;
+          const height = e.offsetY - firstY;
+          renderCtx.strokeRect(firstX, firstY, width, height);
+          // set the begining point for next stroke
+          [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function drawRect(e) {
+          const width = e.offsetX - firstX;
+          const height = e.offsetY - firstY;
+          resultCtx.strokeRect(firstX, firstY, width, height);
+          // set the begining point for next stroke
+          [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function handleStart(e) {
+          isDrawing = true;
+          [firstX, firstY] = [e.offsetX, e.offsetY];
+          [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function handleMouseMove(e) {
+          switch (currentMode) {
+            case FREEHAND:
+              drawFreehand(e);
+              break;
+            case STRAIGHT:
+              drawFreehand(e);
+              break;
+            case RECTANGLE:
+              renderRect(e);
+              break;
+            default:
+              break;
+          }
+        }
+
+        function handleStop(e) {
+          isDrawing = false;
+          if (currentMode === STRAIGHT) {
+            drawStraight(e);
+          } else if (currentMode === RECTANGLE) {
+            drawRect(e);
+          }
+        }
+
+        renderCanvas.addEventListener("mousedown", handleStart);
+        renderCanvas.addEventListener("mousemove", handleMouseMove);
+        renderCanvas.addEventListener("mouseup", handleStop);
+        renderCanvas.addEventListener("mouseout", () => (isDrawing = false));
+      }
+      window.onload = load;
     </script>
 
     <style>
